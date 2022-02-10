@@ -53,4 +53,4 @@ dkms.conf
 
 .vscode/
 disastrOS_test
-disastrOS
+disastrOS*
