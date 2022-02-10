@@ -1,3 +1,7 @@
+*
+!/**/
+!*.*
+
 # Prerequisites
 *.d
 
@@ -52,5 +56,3 @@ Mkfile.old
 dkms.conf
 
 .vscode/
-disastrOS_test
-disastrOS*
