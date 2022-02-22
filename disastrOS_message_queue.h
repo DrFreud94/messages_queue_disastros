@@ -4,10 +4,10 @@
 #define MESSAGE_LENGTH_MAX 128
 
 typedef struct MessageQueue {
-    Resource resource; //extends resources
+    Resource* resource;
     ListHead messages;
-    ListHead waiting_to_write;
-    ListHead waiting_to_read;
+    ListHead waiting_write_pcbs;
+    ListHead waiting_read_pcbs;
     int available;
 }MessageQueue;
 
@@ -22,13 +22,16 @@ typedef struct Message {
 void mq_init();
 
 //allocate a message queue
-Resource* mq_alloc();
+Resource* mq_alloc(int id);
 
 //free a message queue
 int mq_free(Resource* r);
 
 //get the first message from queue
 Message* mq_get_first_message(MessageQueue* mq);
+
+//print the message queue
+void print_mq(MessageQueue* mq);
 
 //initialize Message at operating system level
 void m_init();

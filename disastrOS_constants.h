@@ -52,3 +52,4 @@
 
 //messages queue
 #define M_FOR_MQ 128
+#define MESSAGE_QUEUE_TYPE 0
