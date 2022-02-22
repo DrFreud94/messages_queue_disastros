@@ -1,7 +1,7 @@
 #include "disastrOS_resource.h"
 #include "pool_allocator.h"
 
-#define MESSAGE_LENGTH_MAX 64
+#define MESSAGE_LENGTH_MAX 128
 
 typedef struct MessageQueue {
     Resource resource; //extends resources
