@@ -11,8 +11,7 @@
 #include "disastrOS_timer.h"
 #include "disastrOS_resource.h"
 #include "disastrOS_descriptor.h"
-//activity message_queue 22022022
-#include "disastrOS_message_queue.h"
+
 
 FILE* log_file=NULL;
 PCB* init_pcb;
