@@ -38,7 +38,7 @@ typedef struct {
 }Message;
 
 //instantiation at disastrOS start, and message queue init
-void init();
+void m_init();
 
 //allocation of message instance
 Message* m_alloc(char* msg, int length, int sender_id);
