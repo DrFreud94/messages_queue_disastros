@@ -1,8 +1,12 @@
 #include "disastrOS_resource.h"
 #include "disastrOS_pcb.h"
 
+#define MESSAGE_STRING_MAX_LENGTH 128
+
+//MessageQueue struct
 typedef struct {
     Resource resource;
+    ListHead* msgs;
     ListHead* reading_pids;
     ListHead* writing_pids;
 }MessageQueue;
@@ -23,3 +27,21 @@ int mq_free(Resource* r);
 
 //print the queue
 void print_mq(Resource* r);
+
+
+//Message struct
+typedef struct {
+    ListItem list;
+    char msg[MESSAGE_STRING_MAX_LENGTH];
+    int length;
+    int sender_pid_id;
+}Message;
+
+//instantiation at disastrOS start, and message queue init
+void init();
+
+//allocation of message instance
+Message* m_alloc(char* msg, int length, int sender_id);
+
+//deallocation of MessageQueue instance
+int m_free(Message* m);
