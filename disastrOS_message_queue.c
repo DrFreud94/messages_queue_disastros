@@ -3,6 +3,9 @@
 #include "disastrOS_constants.h"
 
 #include <assert.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define MQ_SIZE sizeof(MessageQueue)
 #define MQ_MEMSIZE (sizeof(MessageQueue)+sizeof(int))
@@ -59,11 +62,12 @@ void print_mq(Resource* r) {
     ListItem* messages = mq->msgs->first;
     int i = 0;
     while(messages != NULL) {
-        printf("Message n. %d: \n");
+        printf("Message n. %d: \n", i);
         printf("%s\n",((Message*)messages)->msg);
         printf("Sender PID: %d\n", ((Message*)messages)->sender_pid_id);
         printf("-------------------------------------------------------\n");
         messages = messages->next;
+        i = i + 1;
     }
 
     ListItem* write_pids = mq->writing_pids;
@@ -89,7 +93,7 @@ Message* m_alloc(char* msg, int length, int sender_id) {
     Message* m = PoolAllocator_getBlock(&_m_allocator);
     m->msg = msg;
     m->length = length;
-    m->sender_id = sender_id;
+    m->sender_pid_id = sender_id;
     return m;
 }
 
