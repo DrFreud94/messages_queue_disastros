@@ -29,8 +29,71 @@ void mq_init() {
     m_init();
 }
 
+//alloc MessageQueue
+Resource* mq_alloc() {
+    MessageQueue* mq = PoolAllocator_getBlock(&_mq_allocator);
+    List_init(mq->msgs);
+    List_init(mq->reading_pids);
+    List_init(mq->writing_pids);
+
+    return (Resource*)mq;
+}
+
+//dealloc MessageQueue
+int mq_free(Resource* r) {
+    MessageQueue* mq = (MessageQueue*)r;
+    ListItem* message = mq->msgs->first;
+    while(message != NULL) {
+        int result = m_free((Message*)message);
+        assert(!result);
+        message = message->next;
+    }
+    return PoolAllocator_releaseBlock(&_mq_allocator, r);
+}
+
+//print queue
+void print_mq(Resource* r) {
+    MessageQueue* mq = (MessageQueue*)r;
+    printf("printing message queue with id %d\n", r->id);
+    
+    ListItem* messages = mq->msgs->first;
+    int i = 0;
+    while(messages != NULL) {
+        printf("Message n. %d: \n");
+        printf("%s\n",((Message*)messages)->msg);
+        printf("Sender PID: %d\n", ((Message*)messages)->sender_pid_id);
+        printf("-------------------------------------------------------\n");
+        messages = messages->next;
+    }
+
+    ListItem* write_pids = mq->writing_pids;
+    while(write_pids != NULL) {
+        printf("PID waiting for writing n. %d;\n", ((PCB*)write_pids)->pid);
+        write_pids = write_pids->next;
+    }
+    ListItem* read_pids = mq->reading_pids;
+    while(read_pids != NULL) {
+        printf("PID waiting for reading n. %d;\n", ((PCB*)read_pids)->pid);
+        read_pids = read_pids->next;
+    }
+}
+
 //init Message allocator
 void m_init() {
     int result = PoolAllocator_init(&_m_allocator, sizeof(Message), M_FOR_MQ, _m_ptr_buffer, M_BUFFER_SIZE);
     assert(!result);
+}
+
+//alloc Message
+Message* m_alloc(char* msg, int length, int sender_id) {
+    Message* m = PoolAllocator_getBlock(&_m_allocator);
+    m->msg = msg;
+    m->length = length;
+    m->sender_id = sender_id;
+    return m;
+}
+
+//dealloc Message
+int m_free(Message* m) {
+    return PoolAllocator_releaseBlock(&_m_allocator, m);
 }
