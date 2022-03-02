@@ -7,6 +7,7 @@
 typedef struct {
     Resource resource;
     ListHead* msgs;
+    int mq_messages_length;
     ListHead* reading_pids;
     ListHead* writing_pids;
 }MessageQueue;
@@ -27,6 +28,9 @@ int mq_free(Resource* r);
 
 //print the queue
 void print_mq(Resource* r);
+
+//get first messages from queue
+Message* getMessage(Resource* r);
 
 
 //Message struct

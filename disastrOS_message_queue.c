@@ -35,10 +35,14 @@ void mq_init() {
 //alloc MessageQueue
 Resource* mq_alloc() {
     MessageQueue* mq = PoolAllocator_getBlock(&_mq_allocator);
+
+    if(!mq)
+        return NULL;
+    
     List_init(mq->msgs);
     List_init(mq->reading_pids);
     List_init(mq->writing_pids);
-
+    mq->mq_messages_length = 0;
     return (Resource*)mq;
 }
 
@@ -82,6 +86,12 @@ void print_mq(Resource* r) {
     }
 }
 
+//get first message from queue
+Message* getMessage(Resource* r) {
+    if(r == NULL) return NULL;
+    return ((MessageQueue*)r)->msgs->first;
+}
+
 //init Message allocator
 void m_init() {
     int result = PoolAllocator_init(&_m_allocator, sizeof(Message), M_FOR_MQ, _m_ptr_buffer, M_BUFFER_SIZE);
@@ -91,6 +101,13 @@ void m_init() {
 //alloc Message
 Message* m_alloc(char* msg, int length, int sender_id) {
     Message* m = PoolAllocator_getBlock(&_m_allocator);
+    if(!m)
+        return NULL;
+    
+    if(length > MESSAGE_STRING_MAX_LENGTH) {
+        return NULL;
+    }
+
     for(int i = 0; i < length; i++) {
         m->msg[i] = msg[i];
     }
