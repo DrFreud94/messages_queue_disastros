@@ -11,6 +11,7 @@
 #include "disastrOS_timer.h"
 #include "disastrOS_resource.h"
 #include "disastrOS_descriptor.h"
+#include "disastrOS_message_queue.h"
 
 
 FILE* log_file=NULL;
@@ -142,6 +143,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   Timer_init();
   Resource_init();
   Descriptor_init();
+  mq_init();
   init_pcb=0;
 
   // populate the vector of syscalls and number of arguments for each syscall

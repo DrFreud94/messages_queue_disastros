@@ -39,9 +39,9 @@ Resource* mq_alloc() {
     if(!mq)
         return NULL;
     
-    List_init(mq->msgs);
-    List_init(mq->reading_pids);
-    List_init(mq->writing_pids);
+    List_init(&mq->msgs);
+    List_init(&mq->reading_pids);
+    List_init(&mq->writing_pids);
     mq->mq_messages_length = 0;
     return (Resource*)mq;
 }
@@ -49,9 +49,10 @@ Resource* mq_alloc() {
 //dealloc MessageQueue
 int mq_free(Resource* r) {
     MessageQueue* mq = (MessageQueue*)r;
-    ListItem* message = mq->msgs->first;
+    ListItem* message = mq->msgs.first;
+    int result = 0;
     while(message != NULL) {
-        int result = m_free((Message*)message);
+        result = m_free((Message*)message);
         assert(!result);
         message = message->next;
     }
@@ -63,7 +64,7 @@ void print_mq(Resource* r) {
     MessageQueue* mq = (MessageQueue*)r;
     printf("printing message queue with id %d\n", r->id);
     
-    ListItem* messages = mq->msgs->first;
+    ListItem* messages = mq->msgs.first;
     int i = 0;
     while(messages != NULL) {
         printf("Message n. %d: \n", i);
@@ -74,12 +75,12 @@ void print_mq(Resource* r) {
         i = i + 1;
     }
 
-    ListItem* write_pids = mq->writing_pids;
+    ListItem* write_pids = mq->writing_pids.first;
     while(write_pids != NULL) {
         printf("PID waiting for writing n. %d;\n", ((PCB*)write_pids)->pid);
         write_pids = write_pids->next;
     }
-    ListItem* read_pids = mq->reading_pids;
+    ListItem* read_pids = mq->reading_pids.first;
     while(read_pids != NULL) {
         printf("PID waiting for reading n. %d;\n", ((PCB*)read_pids)->pid);
         read_pids = read_pids->next;
@@ -89,7 +90,7 @@ void print_mq(Resource* r) {
 //get first message from queue
 Message* getMessage(Resource* r) {
     if(r == NULL) return NULL;
-    return ((MessageQueue*)r)->msgs->first;
+    return ((MessageQueue*)r)->msgs.first;
 }
 
 //init Message allocator

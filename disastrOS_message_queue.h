@@ -6,11 +6,19 @@
 //MessageQueue struct
 typedef struct {
     Resource resource;
-    ListHead* msgs;
+    ListHead msgs;
     int mq_messages_length;
-    ListHead* reading_pids;
-    ListHead* writing_pids;
+    ListHead reading_pids;
+    ListHead writing_pids;
 }MessageQueue;
+
+//Message struct
+typedef struct {
+    ListItem list;
+    char msg[MESSAGE_STRING_MAX_LENGTH];
+    int length;
+    int sender_pid_id;
+}Message;
 
 /*
  * MessageQueue function signatures. They execute the principal jobs about instatiation, allocation and deallocation.
@@ -31,15 +39,6 @@ void print_mq(Resource* r);
 
 //get first messages from queue
 Message* getMessage(Resource* r);
-
-
-//Message struct
-typedef struct {
-    ListItem list;
-    char msg[MESSAGE_STRING_MAX_LENGTH];
-    int length;
-    int sender_pid_id;
-}Message;
 
 //instantiation at disastrOS start, and message queue init
 void m_init();
