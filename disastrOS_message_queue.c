@@ -13,7 +13,8 @@
 
 #define M_SIZE sizeof(Message)
 #define M_MEMSIZE (sizeof(Message)+sizeof(int))
-#define M_BUFFER_SIZE M_MEMSIZE*M_FOR_MQ
+#define M_TOTAL M_MEMSIZE*M_FOR_MQ
+#define M_BUFFER_SIZE M_TOTAL*MAX_NUM_RESOURCES
 
 //allocator for mq
 static PoolAllocator _mq_allocator;
@@ -42,7 +43,6 @@ Resource* mq_alloc() {
     List_init(&mq->msgs);
     List_init(&mq->reading_pids);
     List_init(&mq->writing_pids);
-    mq->mq_messages_length = 0;
     return (Resource*)mq;
 }
 
@@ -90,12 +90,12 @@ void print_mq(Resource* r) {
 //get first message from queue
 Message* getMessage(Resource* r) {
     if(r == NULL) return NULL;
-    return ((MessageQueue*)r)->msgs.first;
+    return (Message*)((MessageQueue*)r)->msgs.first;
 }
 
 //init Message allocator
 void m_init() {
-    int result = PoolAllocator_init(&_m_allocator, sizeof(Message), M_FOR_MQ, _m_ptr_buffer, M_BUFFER_SIZE);
+    int result = PoolAllocator_init(&_m_allocator, sizeof(Message), MAX_NUM_RESOURCES, _m_ptr_buffer, M_BUFFER_SIZE);
     assert(!result);
 }
 

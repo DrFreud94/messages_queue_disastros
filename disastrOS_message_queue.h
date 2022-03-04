@@ -7,7 +7,6 @@
 typedef struct {
     Resource resource;
     ListHead msgs;
-    int mq_messages_length;
     ListHead reading_pids;
     ListHead writing_pids;
 }MessageQueue;

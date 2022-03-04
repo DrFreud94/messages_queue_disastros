@@ -24,3 +24,7 @@ void internal_openResource();
 void internal_closeResource();
 
 void internal_destroyResource();
+
+void internal_message_queue_write();
+
+void internal_message_queue_read();

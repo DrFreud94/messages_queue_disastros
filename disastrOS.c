@@ -182,6 +182,12 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   syscall_vector[DSOS_CALL_SHUTDOWN]      = internal_shutdown;
   syscall_numarg[DSOS_CALL_SHUTDOWN]      = 0;
 
+  syscall_vector[DSOS_CALL_MESSAGE_QUEUE_READ] = internal_message_queue_read;
+  syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_READ] = 3;
+
+  syscall_vector[DSOS_CALL_MESSAGE_QUEUE_WRITE] = internal_message_queue_write;
+  syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_WRITE] = 3;
+
   // setup the scheduling lists
   running=0;
   List_init(&ready_list);
