@@ -1,5 +1,6 @@
 #include "disastrOS_resource.h"
 #include "disastrOS_pcb.h"
+#include "linked_list.h"
 
 #define MESSAGE_STRING_MAX_LENGTH 128
 
