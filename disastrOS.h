@@ -38,3 +38,7 @@ int disastrOS_destroyResource(int resource_id);
 
 // debug function, prints the state of the internal system
 void disastrOS_printStatus();
+
+//MessageQueue syscalls
+int disastrOS_mq_read(int resource_id, char* buf_msg, int length);
+int disastrOS_mq_write(int resource_id, const char* msg, int length);

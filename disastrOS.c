@@ -297,7 +297,13 @@ int disastrOS_destroyResource(int resource_id) {
   return disastrOS_syscall(DSOS_CALL_DESTROY_RESOURCE, resource_id);
 }
 
+int disastrOS_mq_read(int resource_id, char* buf_msg, int length) {
+  return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_READ, resource_id, buf_msg, length);
+}
 
+int disastrOS_mq_write(int resource_id, const char* msg, int length) {
+  return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_WRITE, resource_id, msg, length);
+}
 
 void disastrOS_printStatus(){
   printf("****************** DisastrOS ******************\n");
