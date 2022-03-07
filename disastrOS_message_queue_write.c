@@ -25,7 +25,13 @@ void internal_message_queue_write() {
         return;
     }
 
-    MessageQueue* mq = (MessageQueue*)d->resource;
+    Resource* resource = d->resource;
+    if(resource->type != MESSAGE_QUEUE_TYPE) {
+        running->syscall_retvalue = DSOS_ESYSCALL_NOT_IMPLEMENTED;
+        return;
+    }
+
+    MessageQueue* mq = (MessageQueue*)resource;
 
     if(mq->msgs.size == M_FOR_MQ) {
         running->status = Waiting;
