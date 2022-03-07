@@ -11,7 +11,7 @@
 //write a message in a message queue.
 void internal_message_queue_write() {
     int fd = running->syscall_args[0];
-    const char* msg_ptr = running->syscall_args[1];
+    const char* msg_ptr = (char*)running->syscall_args[1];
     int length = running->syscall_args[2];
 
     if(length < 0 || length > MESSAGE_STRING_MAX_LENGTH) {
@@ -38,7 +38,7 @@ void internal_message_queue_write() {
         List_insert(&waiting_list, waiting_list.last, (ListItem*)running);
         List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*) PCBPtr_alloc(running));
 
-        PCB* next = List_detach(&ready_list, ready_list.first);
+        PCB* next = (PCB*)List_detach(&ready_list, ready_list.first);
         next->status = Running;
         running = next;
         return;

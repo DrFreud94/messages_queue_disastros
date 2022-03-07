@@ -10,7 +10,7 @@
 //read a message from a message queue.
 void internal_message_queue_read() {
     int fd = running->syscall_args[0];
-    char* msg_ptr = running->syscall_args[1];
+    char* msg_ptr = (char*)running->syscall_args[1];
     int length = running->syscall_args[2];
 
     Descriptor* d = DescriptorList_byFd(&running->descriptors, fd);
@@ -31,7 +31,7 @@ void internal_message_queue_read() {
         List_insert(&waiting_list, waiting_list.last, (ListItem*)running);
         List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*) PCBPtr_alloc(running));
 
-        PCB* next = List_detach(&ready_list, ready_list.first);
+        PCB* next = (PCB*)List_detach(&ready_list, ready_list.first);
         next->status = Running;
         running = next;
         return;
@@ -50,7 +50,7 @@ void internal_message_queue_read() {
 
     List_detach(&mq->msgs, (ListItem*)m);
 
-    asset(m_free(m)>=0);
+    assert(m_free(m)>=0);
 
     while(mq->writing_pids.size > 0) {
         PCBPtr* process = (PCBPtr*)List_detach(&mq->writing_pids, mq->writing_pids.first);

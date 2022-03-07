@@ -100,7 +100,7 @@ void m_init() {
 }
 
 //alloc Message
-Message* m_alloc(char* msg, int length, int sender_id) {
+Message* m_alloc(const char* msg, int length, int sender_id) {
     Message* m = PoolAllocator_getBlock(&_m_allocator);
     if(!m)
         return NULL;
