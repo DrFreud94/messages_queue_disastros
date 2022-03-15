@@ -322,4 +322,10 @@ void disastrOS_printStatus(){
   printf("\nZombie: ");
   PCBList_print(&zombie_list);
   printf("\n***********************************************\n\n");
+
+  MessageQueue* mq = (MessageQueue*)resources_list.first;
+  while(mq) {
+    print_mq((Resource*)mq);
+    mq = (MessageQueue*)((ListItem*)mq)->next;
+  }
 };

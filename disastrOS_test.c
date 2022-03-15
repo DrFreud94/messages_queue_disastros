@@ -3,6 +3,7 @@
 #include <poll.h>
 
 #include "disastrOS.h"
+#include "disastrOS_message_queue.h"
 
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
@@ -27,6 +28,37 @@ void childFunction(void* args){
     disastrOS_sleep((20-disastrOS_getpid())*5);
   }
   disastrOS_exit(disastrOS_getpid()+1);
+}
+
+void read_childFunction(void* args) {
+  printf("Hello, I am the child function %d\n",disastrOS_getpid());
+  printf("I will iterate a bit, before terminating\n");
+  int type=MESSAGE_QUEUE_TYPE;
+  int mode=0;
+  int fd_passed = *(int*)args;
+  int fd=disastrOS_openResource(fd_passed, type, mode);
+  printf("reading MessageQueue fd=%d\n process PID: %d\n", fd, disastrOS_getpid());
+
+  char message[MESSAGE_STRING_MAX_LENGTH];
+  
+  int messages_read = 0;
+  int ret_value = DSOS_MQ_CONTINUE;
+
+  while(ret_value) {
+    ret_value = disastrOS_mq_read(fd, message, MESSAGE_STRING_MAX_LENGTH);
+    if(ret_value > 0) {
+      messages_read++;
+      printf("child %d read: %s.\n", disastrOS_getpid(), message);
+    }
+  }
+
+  printf("child %d - read %d messages.\n", disastrOS_getpid(), messages_read);
+  disastrOS_closeResource(fd);
+  disastrOS_exit(read_messages);
+}
+
+void write_childFunction(void* args) {
+  
 }
 
 
