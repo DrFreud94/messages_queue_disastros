@@ -61,6 +61,6 @@
 #define INTERVAL 100 // milliseconds for timer tick
 
 //messages queue
-#define M_FOR_MQ 128
+#define M_FOR_MQ 64
 #define STANDARD_RESOURCE_TYPE 0
 #define MESSAGE_QUEUE_TYPE 1
