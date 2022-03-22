@@ -27,20 +27,20 @@ void internal_message_queue_write() {
 
     Resource* resource = d->resource;
     if(resource->type != MESSAGE_QUEUE_TYPE) {
-        running->syscall_retvalue = DSOS_ESYSCALL_NOT_IMPLEMENTED;
+        running->syscall_retvalue = DSOS_ERESOURCETYPEWRONG;
         return;
     }
 
     MessageQueue* mq = (MessageQueue*)resource;
 
     if(mq->msgs.size == M_FOR_MQ) {
-        running->status = Waiting;
-        List_insert(&waiting_list, waiting_list.last, (ListItem*)running);
-        List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*) PCBPtr_alloc(running));
+        // running->status = Waiting;
+        // List_insert(&waiting_list, waiting_list.last, (ListItem*)running);
+        // List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*) PCBPtr_alloc(running));
 
-        PCB* next = (PCB*)List_detach(&ready_list, ready_list.first);
-        next->status = Running;
-        running = next;
+        // PCB* next = (PCB*)List_detach(&ready_list, ready_list.first);
+        // next->status = Running;
+        // running = next;
         return;
     }
 
@@ -48,16 +48,16 @@ void internal_message_queue_write() {
 
     List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);
 
-    while(mq->reading_pids.size > 0) {
-        PCBPtr* process = (PCBPtr*)List_detach(&mq->reading_pids, mq->reading_pids.first);
-        PCB* pcb = process->pcb;
+    // while(mq->reading_pids.size > 0) {
+    //     PCBPtr* process = (PCBPtr*)List_detach(&mq->reading_pids, mq->reading_pids.first);
+    //     PCB* pcb = process->pcb;
 
-        pcb->status = Ready;
-        pcb->return_value = DSOS_MQ_CONTINUE;
-        List_insert(&ready_list, ready_list.last, (ListItem*) pcb);
+    //     pcb->status = Ready;
+    //     pcb->return_value = DSOS_MQ_CONTINUE;
+    //     List_insert(&ready_list, ready_list.last, (ListItem*) pcb);
 
-        assert(PCBPtr_free(process)>=0);
-    }
+    //     assert(PCBPtr_free(process)>=0);
+    // }
 
     running->syscall_retvalue = length;
 }

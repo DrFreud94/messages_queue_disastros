@@ -21,19 +21,20 @@ void internal_message_queue_read() {
 
     Resource* resource = d->resource;
     if(resource->type != MESSAGE_QUEUE_TYPE) {
-        running->syscall_retvalue = DSOS_ESYSCALL_NOT_IMPLEMENTED;
+        running->syscall_retvalue = DSOS_ERESOURCETYPEWRONG;
         return;
     }
 
     MessageQueue* mq = (MessageQueue*)resource;
     if(mq->msgs.size == 0) {
-        running->status = Waiting;
-        List_insert(&waiting_list, waiting_list.last, (ListItem*)running);
-        List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*) PCBPtr_alloc(running));
+        // running->status = Waiting;
+        // List_insert(&waiting_list, waiting_list.last, (ListItem*)running);
+        // List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*) PCBPtr_alloc(running));
 
-        PCB* next = (PCB*)List_detach(&ready_list, ready_list.first);
-        next->status = Running;
-        running = next;
+        // PCB* next = (PCB*)List_detach(&ready_list, ready_list.first);
+        // next->status = Running;
+        // running = next;
+        running->return_value = DSOS_MESSAGEQUEUEEMPTY;
         return;
     }
 
@@ -48,20 +49,22 @@ void internal_message_queue_read() {
         msg_ptr[i] = m->msg[i];
     }
 
+    //TODO: fare in modo che il messaggio non venga inviato qualora non ci siano processi in lettura
+
     List_detach(&mq->msgs, (ListItem*)m);
 
     assert(m_free(m)>=0);
 
-    while(mq->writing_pids.size > 0) {
-        PCBPtr* process = (PCBPtr*)List_detach(&mq->writing_pids, mq->writing_pids.first);
-        PCB* pcb = process->pcb;
+    // while(mq->writing_pids.size > 0) {
+    //     PCBPtr* process = (PCBPtr*)List_detach(&mq->writing_pids, mq->writing_pids.first);
+    //     PCB* pcb = process->pcb;
 
-        pcb->status = Ready;
-        pcb->return_value = DSOS_MQ_CONTINUE;
-        List_insert(&ready_list, ready_list.last, (ListItem*) pcb);
+    //     pcb->status = Ready;
+    //     pcb->return_value = DSOS_MQ_CONTINUE;
+    //     List_insert(&ready_list, ready_list.last, (ListItem*) pcb);
 
-        assert(PCBPtr_free(process)>=0);
-    }
+    //     assert(PCBPtr_free(process)>=0);
+    // }
 
     running->return_value = l_message;
 }

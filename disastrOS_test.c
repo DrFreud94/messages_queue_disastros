@@ -7,6 +7,9 @@
 #include "disastrOS.h"
 #include "disastrOS_message_queue.h"
 
+//TODO: occorre generare "un semaforo", in modo che la lettura e la scrittura siano regolate attivamente.
+//Potrebbe essere sufficiente anche mettere a dormire il processo.
+
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
   printf("Hello, I am the sleeper, and I sleep %d\n",disastrOS_getpid());
