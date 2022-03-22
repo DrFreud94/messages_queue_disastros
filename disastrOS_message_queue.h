@@ -18,6 +18,7 @@ typedef struct {
     char msg[MESSAGE_STRING_MAX_LENGTH];
     int length;
     int sender_pid_id;
+    int receiver_pid_id;
 }Message;
 
 /*
@@ -44,7 +45,7 @@ Message* getMessage(Resource* r);
 void m_init();
 
 //allocation of message instance
-Message* m_alloc(const char* msg, int length, int sender_id);
+Message* m_alloc(const char* msg, int length, int sender_id, int receiver_id);
 
 //deallocation of MessageQueue instance
 int m_free(Message* m);

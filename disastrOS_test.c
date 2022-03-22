@@ -10,6 +10,9 @@
 //TODO: occorre generare "un semaforo", in modo che la lettura e la scrittura siano regolate attivamente.
 //Potrebbe essere sufficiente anche mettere a dormire il processo.
 
+//We set a global variable, that indicate if the PCBs are still running
+int run = 1;
+
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
   printf("Hello, I am the sleeper, and I sleep %d\n",disastrOS_getpid());

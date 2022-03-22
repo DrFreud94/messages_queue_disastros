@@ -43,7 +43,7 @@ void internal_message_queue_write() {
         // running = next;
         return;
     }
-
+    
     Message* m = m_alloc(msg_ptr, length, running->pid);
 
     List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);

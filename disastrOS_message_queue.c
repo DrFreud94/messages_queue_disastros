@@ -100,7 +100,7 @@ void m_init() {
 }
 
 //alloc Message
-Message* m_alloc(const char* msg, int length, int sender_id) {
+Message* m_alloc(const char* msg, int length, int sender_id, int receiver_id) {
     Message* m = PoolAllocator_getBlock(&_m_allocator);
     if(!m)
         return NULL;
@@ -114,6 +114,7 @@ Message* m_alloc(const char* msg, int length, int sender_id) {
     }
     m->length = length;
     m->sender_pid_id = sender_id;
+    m->receiver_pid_id = receiver_id;
     return m;
 }
 
