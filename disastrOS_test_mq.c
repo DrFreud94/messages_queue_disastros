@@ -43,7 +43,7 @@ void childFunction(void* args){
 
 void initFunction(void* args) {
   disastrOS_printStatus();
-//   printf("hello, I am init and I just started\n");
+  printf("hello, I am init and I just started\n");
 //   disastrOS_spawn(sleeperFunction, 0);
   
 
@@ -81,7 +81,8 @@ int main(int argc, char** argv){
   // we create the init process processes
   // the first is in the running variable
   // the others are in the ready queue
-  printf("the function pointer is: %p", childFunction);
+  printf("the function pointer read_childFunction is: %p\n", read_childFunction);
+  printf("the function pointer write_childFunction is: %p\n", write_childFunction);
   // spawn an init process
   printf("start\n");
   disastrOS_start(initFunction, 0, logfilename);
