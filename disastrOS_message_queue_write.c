@@ -56,9 +56,5 @@ void internal_message_queue_write() {
         List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);
         messages_sent++;
     }
-    
-
-    
-
     running->syscall_retvalue = messages_sent;
 }
