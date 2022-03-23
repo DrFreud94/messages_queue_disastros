@@ -46,15 +46,9 @@ void internal_message_queue_write() {
         running->return_value=DSOS_EREADINGPCBMQNOTFOUND;
         return;
     }
-
-    int messages_sent = 0;
-
-    ListItem* process_reading = mq->reading_pids.first;
-    while(process_reading != NULL) {
-        Message* m = m_alloc(msg_ptr, length, running->pid, ((PCB*)process_reading)->pid);
-        process_reading = process_reading->next;
-        List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);
-        messages_sent++;
-    }
-    running->syscall_retvalue = messages_sent;
+    
+    Message* m = m_alloc(msg_ptr, length, running->pid, pid_receiver);
+    List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);
+    
+    running->syscall_retvalue = length;
 }

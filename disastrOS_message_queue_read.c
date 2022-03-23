@@ -40,7 +40,6 @@ void internal_message_queue_read() {
 
     //TODO: fare in modo che il processo non legga messaggi altrui. Solo quelli riservati
     //a lui possono essere letti.
-    int messages_readed = 0;
     Message* m = (Message*)mq->msgs.first;
     
     while(m->receiver_pid_id != disastrOS_getpid() && m != NULL) {
