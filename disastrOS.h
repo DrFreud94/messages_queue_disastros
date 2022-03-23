@@ -41,4 +41,4 @@ void disastrOS_printStatus();
 
 //MessageQueue syscalls
 int disastrOS_mq_read(int resource_id, char* buf_msg, int length);
-int disastrOS_mq_write(int resource_id, const char* msg, int length);
+int disastrOS_mq_write(int resource_id, const char* msg, int length, int pid_receiver);

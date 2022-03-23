@@ -53,11 +53,12 @@ void internal_message_queue_write() {
     while(process_reading != NULL) {
         Message* m = m_alloc(msg_ptr, length, running->pid, ((PCB*)process_reading)->pid);
         process_reading = process_reading->next;
+        List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);
         messages_sent++;
     }
     
 
-    List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);
+    
 
     running->syscall_retvalue = messages_sent;
 }
