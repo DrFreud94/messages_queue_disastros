@@ -38,23 +38,30 @@ void internal_message_queue_read() {
         return;
     }
 
+    //TODO: fare in modo che il processo non legga messaggi altrui. Solo quelli riservati
+    //a lui possono essere letti.
+    int messages_readed = 0;
     Message* m = (Message*)mq->msgs.first;
-    int l_message = m->length;
-    if(m->length > length) {
-        running->return_value = DSOS_MESSAGELENGTHNOTVALID;
-        return;
-    }
     
-    for(int i = 0; i < m->length; i++) {
-        msg_ptr[i] = m->msg[i];
+    while(m->receiver_pid_id != disastrOS_getpid() && m != NULL) {
+        m = (Message*)((ListItem*)m)->next;
     }
 
-    //TODO: fare in modo che il messaggio non venga inviato qualora non ci siano processi in lettura
-
-    List_detach(&mq->msgs, (ListItem*)m);
-
-    assert(m_free(m)>=0);
-
+    if(m != NULL) {
+        if(m->length > length) {
+            running->return_value = DSOS_MESSAGELENGTHNOTVALID;
+            return;
+        } else {
+            for(int i = 0; i < m->length; i++) {
+                msg_ptr[i] = m->msg[i];
+            }
+            running->return_value = m->length;
+        }
+        List_detach(&mq->msgs, (ListItem*)m);
+        assert(m_free(m)>=0);
+    } else {
+        running->return_value = DSOS_NOMESSAGEFORREADERPROCESS;
+    }
     // while(mq->writing_pids.size > 0) {
     //     PCBPtr* process = (PCBPtr*)List_detach(&mq->writing_pids, mq->writing_pids.first);
     //     PCB* pcb = process->pcb;
@@ -65,6 +72,4 @@ void internal_message_queue_read() {
 
     //     assert(PCBPtr_free(process)>=0);
     // }
-
-    running->return_value = l_message;
 }

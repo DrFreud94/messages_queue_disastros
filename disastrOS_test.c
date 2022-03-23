@@ -7,12 +7,6 @@
 #include "disastrOS.h"
 #include "disastrOS_message_queue.h"
 
-//TODO: occorre generare "un semaforo", in modo che la lettura e la scrittura siano regolate attivamente.
-//Potrebbe essere sufficiente anche mettere a dormire il processo.
-
-//We set a global variable, that indicate if the PCBs are still running
-int run = 1;
-
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
   printf("Hello, I am the sleeper, and I sleep %d\n",disastrOS_getpid());
@@ -38,122 +32,35 @@ void childFunction(void* args){
   disastrOS_exit(disastrOS_getpid()+1);
 }
 
-void read_childFunction(void* args) {
-  printf("Hello, I am the child function %d\n",disastrOS_getpid());
-  printf("I will iterate a bit, before terminating\n");
-  int type=MESSAGE_QUEUE_TYPE;
-  int mode=0;
-  int fd_passed = *(int*)args;
-  int fd=disastrOS_openResource(fd_passed, type, mode);
-  assert(fd >= 0);
-  printf("reading MessageQueue fd=%d\n process PID: %d\n", fd, disastrOS_getpid());
-
-  char message[MESSAGE_STRING_MAX_LENGTH];
-  
-  int messages_read = 0;
-  int ret_value = DSOS_MQ_CONTINUE;
-
-  while(ret_value) {
-    memset(message, 0, sizeof(message));
-    ret_value = disastrOS_mq_read(fd, message, MESSAGE_STRING_MAX_LENGTH);
-    if(ret_value > 0) {
-      messages_read++;
-      printf("child %d read: %s.\n", disastrOS_getpid(), message);
-    }
-  }
-
-  printf("child %d - read %d messages.\n", disastrOS_getpid(), messages_read);
-  disastrOS_closeResource(fd);
-  disastrOS_exit(messages_read);
-}
-
-void write_childFunction(void* args) {
-  printf("Hello, I am the child function %d\n",disastrOS_getpid());
-  printf("I will iterate a bit, before terminating\n");
-  int type=MESSAGE_QUEUE_TYPE;
-  int mode=0;
-  int fd_passed = *(int*)args;
-  int fd=disastrOS_openResource(fd_passed, type, mode);
-  printf("writing MessageQueue fd=%d\n process PID: %d\n", fd, disastrOS_getpid());
-
-  disastrOS_printStatus();
-
-  char message[MESSAGE_STRING_MAX_LENGTH] = "Hello, I'm a writer\n";
-
-  int ret = DSOS_MQ_CONTINUE;
-  int messages_written = 0;
-
-  while(ret >= 0) {
-    ret = disastrOS_mq_write(fd, message, MESSAGE_STRING_MAX_LENGTH);
-    // printf("%d\n", ret);
-    assert(ret >= 0);
-    messages_written++;
-  }
-  printf("child %d - read %d messages.\n", disastrOS_getpid(), messages_written);
-  disastrOS_closeResource(fd);
-  disastrOS_exit(messages_written);
-}
-
 
 void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
-  // disastrOS_spawn(sleeperFunction, 0);
+  disastrOS_spawn(sleeperFunction, 0);
   
 
-  printf("I feel like to spawn 4 nice threads\n");
+  printf("I feel like to spawn 10 nice threads\n");
   int alive_children=0;
-  int resources[2];
-
-  int type=MESSAGE_QUEUE_TYPE;
-  int mode=DSOS_CREATE;
-  printf("mode: %d\n", mode);
-  printf("opening resource (and creating if necessary)\n");
-  for (int i=0; i<2; ++i) {
-    // int type=0;
-    // int mode=DSOS_CREATE;
-    // printf("mode: %d\n", mode);
-    // printf("opening resource (and creating if necessary)\n");
+  for (int i=0; i<10; ++i) {
+    int type=0;
+    int mode=DSOS_CREATE;
+    printf("mode: %d\n", mode);
+    printf("opening resource (and creating if necessary)\n");
     int fd=disastrOS_openResource(i,type,mode);
-    assert(fd >= 0);
     printf("fd=%d\n", fd);
-    resources[i] = fd;
-    // disastrOS_spawn(childFunction, 0);
-    // alive_children++;
-  }
-
-  for(int i = 0; i < 2; ++i) {
-    disastrOS_spawn(write_childFunction, &resources[i]);
-    disastrOS_spawn(read_childFunction, &resources[i]);
-
-    alive_children += 2;
+    disastrOS_spawn(childFunction, 0);
+    alive_children++;
   }
 
   disastrOS_printStatus();
   int retval;
   int pid;
-  int messages_readed = 0;
-  int messages_written = 0;
   while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){ 
     disastrOS_printStatus();
     printf("initFunction, child: %d terminated, retval:%d, alive: %d \n",
 	   pid, retval, alive_children);
-
-    if(pid%2 == 0) messages_written += retval;
-    else messages_readed += retval;
-
     --alive_children;
   }
-
-
-  printf("Messages readed: %d\n", messages_readed);
-  printf("Messages written: %d\n", messages_written);
-
-  for(int i = 0; i < 2; ++i) {
-    disastrOS_closeResource(resources[i]);
-    disastrOS_destroyResource(resources[i]);
-  }
-
   printf("shutdown!");
   disastrOS_shutdown();
 }

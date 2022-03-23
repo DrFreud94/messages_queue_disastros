@@ -186,7 +186,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_READ] = 3;
 
   syscall_vector[DSOS_CALL_MESSAGE_QUEUE_WRITE] = internal_message_queue_write;
-  syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_WRITE] = 3;
+  syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_WRITE] = 4;
 
   // setup the scheduling lists
   running=0;
@@ -301,8 +301,8 @@ int disastrOS_mq_read(int resource_id, char* buf_msg, int length) {
   return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_READ, resource_id, buf_msg, length);
 }
 
-int disastrOS_mq_write(int resource_id, const char* msg, int length) {
-  return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_WRITE, resource_id, msg, length);
+int disastrOS_mq_write(int resource_id, const char* msg, int length, int pid_receiver) {
+  return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_WRITE, resource_id, msg, length, pid_receiver);
 }
 
 void disastrOS_printStatus(){
