@@ -7,9 +7,6 @@
 #include "disastrOS.h"
 #include "disastrOS_message_queue.h"
 
-//parameter runtime
-//int run = 1;
-
 //counters for reading and writing messages
 int counters[2];
 
@@ -66,12 +63,6 @@ void read_childFunction(void *args) {
       disastrOS_sleep((20-disastrOS_getpid())*3);
     }
   }
-
-  // while(run) {
-  //   disastrOS_printStatus();
-  //   printf("writer log (PID: %d)\n", disastrOS_getpid());
-  //   disastrOS_sleep((20-disastrOS_getpid())*5);
-  // }
   printf("The reader finished his process - closing resource...\n");
   disastrOS_closeResource(fd, DSOS_READ);
   disastrOS_exit(disastrOS_getpid()+1);
@@ -126,38 +117,12 @@ void write_childFunction(void *args) {
       disastrOS_printStatus();
       disastrOS_sleep((20-disastrOS_getpid())*3);
     }
-    // counters[0]++;
-    // printf("STATUS => written messages: %d, read messages: %d\n");
-    // disastrOS_printStatus();
-    // disastrOS_sleep((20-disastrOS_getpid())*6);
   }
 
-  // while(run) {
-  //   disastrOS_printStatus();
-  //   printf("writer log (PID: %d)\n", disastrOS_getpid());
-  //   printf("***********************************************************************\n");
-  //   disastrOS_sleep((20-disastrOS_getpid())*5);
-  // }
   printf("The writer finished his process - closing resource...\n");
   disastrOS_closeResource(fd, DSOS_WRITE);
   disastrOS_exit(disastrOS_getpid()+1);
 }
-
-// void childFunction(void* args){
-//   printf("Hello, I am the child function %d\n",disastrOS_getpid());
-//   printf("I will iterate a bit, before terminating\n");
-//   int type=0;
-//   int mode=0;
-//   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
-//   printf("fd=%d\n", fd);
-//   printf("PID: %d, terminating\n", disastrOS_getpid());
-
-//   for (int i=0; i<(disastrOS_getpid()+1); ++i){
-//     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
-//     disastrOS_sleep((20-disastrOS_getpid())*5);
-//   }
-//   disastrOS_exit(disastrOS_getpid()+1);
-// }
 
 void initFunction(void* args) {
   disastrOS_printStatus();
@@ -187,29 +152,7 @@ void initFunction(void* args) {
     printf("initFunction, child: %d terminated, retval: %d, alive: %d \n", pid, retval, alive_children);
     --alive_children;
   }
-
-//   printf("I feel like to spawn 10 nice threads\n");
-//   int alive_children=0;
-//   for (int i=0; i<10; ++i) {
-//     int type=0;
-//     int mode=DSOS_CREATE;
-//     printf("mode: %d\n", mode);
-//     printf("opening resource (and creating if necessary)\n");
-//     int fd=disastrOS_openResource(i,type,mode);
-//     printf("fd=%d\n", fd);
-//     disastrOS_spawn(childFunction, 0);
-//     alive_children++;
-//   }
-
-//   disastrOS_printStatus();
-//   int retval;
-//   int pid;
-//   while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){ 
-//     disastrOS_printStatus();
-//     printf("initFunction, child: %d terminated, retval:%d, alive: %d \n",
-// 	   pid, retval, alive_children);
-//     --alive_children;
-//   }
+  
   printf("Written messages: %d\n", counters[0]);
   printf("readed messages: %d\n", counters[1]);
 

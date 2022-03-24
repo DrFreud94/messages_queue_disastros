@@ -7,13 +7,6 @@
 #include "disastrOS_message_queue.h"
 #include "disastrOS_resource_OS.h"
 
-// #define RESOURCE_SIZE sizeof(Resource)
-// #define RESOURCE_MEMSIZE (sizeof(Resource)+sizeof(int))
-// #define RESOURCE_BUFFER_SIZE MAX_NUM_RESOURCES*RESOURCE_MEMSIZE
-
-// static char _resources_buffer[RESOURCE_BUFFER_SIZE];
-// static PoolAllocator _resources_allocator;
-
 static Resource* (*alloc_func[MAX_TYPE_RESOURCES])();
 static int (*dealloc_func[MAX_TYPE_RESOURCES])(Resource*);
 
@@ -23,12 +16,6 @@ static int (*delete_mode[MAX_TYPE_RESOURCES])(Resource*, int);
 
 
 void Resource_init(){
-    // int result=PoolAllocator_init(& _resources_allocator,
-		// 		  RESOURCE_SIZE,
-		// 		  MAX_NUM_RESOURCES,
-		// 		  _resources_buffer,
-		// 		  RESOURCE_BUFFER_SIZE);
-    // assert(! result);
     
     //alloc and dealloc resources of OS, standard
     alloc_func[STANDARD_RESOURCE_TYPE] = sr_alloc;
@@ -44,7 +31,6 @@ void Resource_init(){
 }
 
 Resource* Resource_alloc(int id, int type){
-  // Resource* r=(Resource*) PoolAllocator_getBlock(&_resources_allocator);
 
   if(type + 1 > MAX_TYPE_RESOURCES) {
     return NULL;
@@ -81,7 +67,6 @@ int Resource_free(Resource* r) {
   }
   assert(r->descriptors_ptrs.first==0);
   assert(r->descriptors_ptrs.last==0);
-  //return PoolAllocator_releaseBlock(&_resources_allocator, r);
   return (*dealloc_func[r->type])(r);
 }
 
