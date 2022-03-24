@@ -42,8 +42,6 @@ Resource* mq_alloc() {
         return NULL;
     
     List_init(&mq->msgs);
-    List_init(&mq->reading_pids);
-    List_init(&mq->writing_pids);
     return (Resource*)mq;
 }
 
@@ -62,49 +60,64 @@ int mq_free(Resource* r) {
 
 //set mode
 int mq_set_mode (Resource* r, int mode) {
+    if(r->type != MESSAGE_QUEUE_TYPE) {
+        return 0;
+    }
     MessageQueue* mq = (MessageQueue*)r;
-    ListItem* l = NULL;
-    if(mode == DSOS_READ) l = List_insert(&mq->reading_pids, mq->reading_pids.last, (ListItem*)running);
-    else if(mode == DSOS_WRITE) l = List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*)running);
-    return l != NULL;
+    if(mode == DSOS_READ) mq->reading_pid = PCBPtr_alloc(running);
+    else if(mode == DSOS_WRITE) mq->writing_pid = PCBPtr_alloc(running);
+    return 1;
 }
 
 //delete mode
 int mq_delete_mode(Resource* r, int mode) {
+    if(r->type != MESSAGE_QUEUE_TYPE) {
+        return 0;
+    }
     MessageQueue* mq = (MessageQueue*)r;
-    ListItem* l = NULL;
-    if(mode == DSOS_READ) l = List_detach(&mq->reading_pids, (ListItem*)running);
-    else if(mode == DSOS_WRITE) l = List_detach(&mq->writing_pids, (ListItem*)running);
+    if(mode == DSOS_READ) mq->reading_pid = NULL;
+    else if(mode == DSOS_WRITE) mq->writing_pid = NULL;
 
-    return l != NULL;
+    return 1;
 }
 
 //print queue
 void print_mq(Resource* r) {
     MessageQueue* mq = (MessageQueue*)r;
     printf("printing message queue with id %d\n", r->id);
-    
-    ListItem* messages = mq->msgs.first;
-    int i = 0;
-    while(messages != NULL) {
-        printf("Message n. %d: \n", i);
-        printf("%s\n",((Message*)messages)->msg);
-        printf("Sender PID: %d\n", ((Message*)messages)->sender_pid_id);
-        printf("-------------------------------------------------------\n");
-        messages = messages->next;
-        i = i + 1;
+    if(mq->msgs.size == 0) {
+        printf("There is no message inside the queue!\n");
+        printf("----------------------------------------------------------\n");
+    } else {
+        ListItem* messages = mq->msgs.first;
+        int i = 0;
+        while(messages != NULL) {
+            printf("Message n. %d: \n", i);
+            printf("%s\n",((Message*)messages)->msg);
+            printf("Sender PID: %d\n", ((Message*)messages)->sender_pid_id);
+            printf("-------------------------------------------------------\n");
+            messages = messages->next;
+            i = i + 1;
+        }
+        printf("----------------------------------------------------------\n");
     }
 
-    ListItem* write_pids = mq->writing_pids.first;
-    while(write_pids != NULL) {
-        printf("PID waiting for writing n. %d;\n", ((PCB*)write_pids)->pid);
-        write_pids = write_pids->next;
+    if(mq->writing_pid == NULL) {
+        printf("There is no writing pid for this MQ!\n");
+    } else {
+        PCB* write_pid = mq->writing_pid->pcb;
+        printf("PID for writing n. %d;\n", write_pid->pid);
     }
-    ListItem* read_pids = mq->reading_pids.first;
-    while(read_pids != NULL) {
-        printf("PID waiting for reading n. %d;\n", ((PCB*)read_pids)->pid);
-        read_pids = read_pids->next;
+
+    printf("----------------------------------------------------------\n");
+
+    if(mq->reading_pid == NULL) {
+        printf("There is no reading pid for this MQ!\n");
+    } else {
+        PCB* read_pid = mq->reading_pid->pcb;
+        printf("PID for reading n. %d;\n", read_pid->pid);
     }
+    printf("**********************************************************\n");
 }
 
 //get first message from queue
@@ -120,7 +133,7 @@ void m_init() {
 }
 
 //alloc Message
-Message* m_alloc(const char* msg, int length, int sender_id, int receiver_id) {
+Message* m_alloc(const char* msg, int length) {
     Message* m = PoolAllocator_getBlock(&_m_allocator);
     if(!m)
         return NULL;
@@ -133,8 +146,6 @@ Message* m_alloc(const char* msg, int length, int sender_id, int receiver_id) {
         m->msg[i] = msg[i];
     }
     m->length = length;
-    m->sender_pid_id = sender_id;
-    m->receiver_pid_id = receiver_id;
     return m;
 }
 

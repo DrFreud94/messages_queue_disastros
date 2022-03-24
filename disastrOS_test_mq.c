@@ -10,6 +10,9 @@
 //parameter runtime
 int run = 1;
 
+//counters for reading and writing messages
+int counters[2];
+
 void sighandler(int sig) {
   run = 0;
   printf("Signal Handler - stop write function");
@@ -24,13 +27,36 @@ void sleeperFunction(void* args){
   }
 }
 
-void read_childFunction() {
+void read_childFunction(void *args) {
+  printf("Hello! I'm a reader function for Message queue (id = %d) - PID: %d\n", *(int*)args, disastrOS_getpid());
+  printf("Opening MQ in read mode...\n");
 
+  int fd = disastrOS_openResource(*(int*)args, MESSAGE_QUEUE_TYPE, DSOS_READ);
+
+  printf("MQ opened in read mode - fd = %d.\n", fd);
+
+  while(run) {
+    disastrOS_printStatus();
+    printf("writer log (PID: %d)\n", disastrOS_getpid());
+    disastrOS_sleep((20-disastrOS_getpid())*5);
+  }
+  disastrOS_exit(disastrOS_getpid()+1);
 }
 
-void write_childFunction() {
+void write_childFunction(void *args) {
+  printf("Hello! I'm a writer function for Message queue (id = %d) - PID: %d\n", *(int*)args, disastrOS_getpid());
+  printf("Opening MQ in write mode...\n");
+
+  int fd = disastrOS_openResource(*(int*)args, MESSAGE_QUEUE_TYPE, DSOS_WRITE);
+
+  printf("MQ opened in write mode - fd = %d.\n", fd);
+
+  
+
   while(run) {
-    printf("Enter the function write\n");
+    disastrOS_printStatus();
+    printf("writer log (PID: %d)\n", disastrOS_getpid());
+    printf("***********************************************************************\n");
     disastrOS_sleep((20-disastrOS_getpid())*5);
   }
   disastrOS_exit(disastrOS_getpid()+1);
@@ -57,11 +83,29 @@ void initFunction(void* args) {
   printf("hello, I am init and I just started\n");
   disastrOS_spawn(sleeperFunction, 0);
 
-  disastrOS_spawn(write_childFunction, 0);
-  int retval = -1;
-  
-  disastrOS_wait(0, &retval);
+  printf("Creating a MessageQueue for more process!\n");
+  int resources[2];
+  resources[0] = disastrOS_openResource(0, MESSAGE_QUEUE_TYPE, DSOS_CREATE);
+  assert(resources[0] >= 0);
+  resources[1] = disastrOS_openResource(1, MESSAGE_QUEUE_TYPE, DSOS_CREATE);
+  assert(resources[1] >= 0);
 
+  printf("Message Queue created - ID/fd: %d\n", resources[0]);
+  printf("Message Queue created - ID/fd: %d\n", resources[1]);
+
+
+  int alive_children = 0;
+  for(int i = 0; i < 2; i++) {
+    disastrOS_spawn(write_childFunction, resources + i);
+    disastrOS_spawn(read_childFunction, resources + i);
+    alive_children += 2;
+  }
+  int retval = -1;
+  int pid;
+  while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0) {
+    printf("initFunction, child: %d terminated, retval: %d, alive: %d \n", pid, retval, alive_children);
+    --alive_children;
+  }
 
 //   printf("I feel like to spawn 10 nice threads\n");
 //   int alive_children=0;

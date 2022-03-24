@@ -8,8 +8,8 @@
 typedef struct {
     Resource resource;
     ListHead msgs;
-    ListHead reading_pids;
-    ListHead writing_pids;
+    PCBPtr* reading_pid;
+    PCBPtr* writing_pid;
 }MessageQueue;
 
 //Message struct
@@ -51,7 +51,7 @@ Message* getMessage(Resource* r);
 void m_init();
 
 //allocation of message instance
-Message* m_alloc(const char* msg, int length, int sender_id, int receiver_id);
+Message* m_alloc(const char* msg, int length);
 
 //deallocation of MessageQueue instance
 int m_free(Message* m);

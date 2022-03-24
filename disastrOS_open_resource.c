@@ -19,7 +19,7 @@ void internal_openResource(){
   // otherwise fetch the resource from the system list, and if you don't find it
   // throw an error
   //printf ("CREATING id %d, type: %d, open mode %d\n", id, type, open_mode);
-  if (open_mode&DSOS_CREATE){
+  if (open_mode == DSOS_CREATE){
     if (res) {
       running->syscall_retvalue=DSOS_ERESOURCECREATE;
       return;
@@ -34,13 +34,13 @@ void internal_openResource(){
      return;
   }
   
-  if (open_mode&DSOS_EXCL && res->descriptors_ptrs.size){
+  if (open_mode == DSOS_EXCL && res->descriptors_ptrs.size){
      running->syscall_retvalue=DSOS_ERESOURCENOEXCL;
      return;
   }
 
   //set mode on opening resource
-  if(res->type > STANDARD_RESOURCE_TYPE) {
+  if(res->type > STANDARD_RESOURCE_TYPE && open_mode != DSOS_CREATE) {
     int result = Resource_open(res, open_mode);
     assert(result);
   }

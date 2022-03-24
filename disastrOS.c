@@ -50,7 +50,7 @@ void timerInterrupt(){
   if (log_file)
     fprintf(log_file, "TIME: %d\tPID: %d\tACTION: %s\n", disastrOS_time, running->pid, "TIMER_OUT");
   ++disastrOS_time;
-  printf("time: %d\n", disastrOS_time);
+  //printf("time: %d\n", disastrOS_time);
   internal_schedule();
   if (log_file)
     fprintf(log_file, "TIME: %d\tPID: %d\tACTION: %s\n", disastrOS_time, running->pid, "TIMER_IN");
@@ -186,7 +186,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_READ] = 3;
 
   syscall_vector[DSOS_CALL_MESSAGE_QUEUE_WRITE] = internal_message_queue_write;
-  syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_WRITE] = 4;
+  syscall_numarg[DSOS_CALL_MESSAGE_QUEUE_WRITE] = 3;
 
   // setup the scheduling lists
   running=0;
@@ -301,8 +301,8 @@ int disastrOS_mq_read(int resource_id, char* buf_msg, int length) {
   return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_READ, resource_id, buf_msg, length);
 }
 
-int disastrOS_mq_write(int resource_id, const char* msg, int length, int pid_receiver) {
-  return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_WRITE, resource_id, msg, length, pid_receiver);
+int disastrOS_mq_write(int resource_id, const char* msg, int length) {
+  return disastrOS_syscall(DSOS_CALL_MESSAGE_QUEUE_WRITE, resource_id, msg, length);
 }
 
 void disastrOS_printStatus(){

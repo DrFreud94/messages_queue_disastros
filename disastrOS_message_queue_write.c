@@ -13,7 +13,6 @@ void internal_message_queue_write() {
     int fd = running->syscall_args[0];
     const char* msg_ptr = (char*)running->syscall_args[1];
     int length = running->syscall_args[2];
-    int pid_receiver = running->syscall_args[3];
 
     if(length < 0 || length > MESSAGE_STRING_MAX_LENGTH) {
         running->syscall_retvalue = DSOS_MESSAGELENGTHNOTVALID;
@@ -42,12 +41,12 @@ void internal_message_queue_write() {
     //TODO: impedire di inviare un messaggio se non ci sono processi che leggono.
     //Qualora ci sono, inviare lo stesso messaggio a tutti i processi, uno alla volta.
 
-    if(mq->reading_pids.size == 0) {
+    if(mq->reading_pid == NULL) {
         running->return_value=DSOS_EREADINGPCBMQNOTFOUND;
         return;
     }
     
-    Message* m = m_alloc(msg_ptr, length, running->pid, pid_receiver);
+    Message* m = m_alloc(msg_ptr, length);
     List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);
     
     running->syscall_retvalue = length;
