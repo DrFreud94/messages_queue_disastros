@@ -17,8 +17,6 @@ typedef struct {
     ListItem list;
     char msg[MESSAGE_STRING_MAX_LENGTH];
     int length;
-    int sender_pid_id;
-    int receiver_pid_id;
 }Message;
 
 /*
