@@ -16,8 +16,11 @@
 
 static Resource* (*alloc_func[MAX_TYPE_RESOURCES])();
 static int (*dealloc_func[MAX_TYPE_RESOURCES])(Resource*);
+
 static int (*set_mode[MAX_TYPE_RESOURCES])(Resource*, int);
 static int (*delete_mode[MAX_TYPE_RESOURCES])(Resource*, int);
+
+
 
 void Resource_init(){
     // int result=PoolAllocator_init(& _resources_allocator,

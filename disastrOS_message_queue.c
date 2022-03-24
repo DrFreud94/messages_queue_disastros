@@ -94,7 +94,6 @@ void print_mq(Resource* r) {
         while(messages != NULL) {
             printf("Message n. %d: \n", i);
             printf("%s\n",((Message*)messages)->msg);
-            printf("Sender PID: %d\n", ((Message*)messages)->sender_pid_id);
             printf("-------------------------------------------------------\n");
             messages = messages->next;
             i = i + 1;

@@ -34,23 +34,26 @@ void internal_message_queue_read() {
         // PCB* next = (PCB*)List_detach(&ready_list, ready_list.first);
         // next->status = Running;
         // running = next;
-        running->return_value = DSOS_MESSAGEQUEUEEMPTY;
+        if(mq->writing_pid != NULL) {
+            running->syscall_retvalue = DSOS_WAITINGFORMESSAGE;
+        } else {
+            running->syscall_retvalue = DSOS_MESSAGEQUEUEEMPTY;
+        }
         return;
     }
 
-    //TODO: fare in modo che il processo non legga messaggi altrui. Solo quelli riservati
-    //a lui possono essere letti.
     Message* m = (Message*)mq->msgs.first;
 
+    printf("length message: %d\n", m->length);
     
     if(m->length > length) {
-        running->return_value = DSOS_MESSAGELENGTHNOTVALID;
+        running->syscall_retvalue = DSOS_MESSAGELENGTHNOTVALID;
         return;
     } else {
         for(int i = 0; i < m->length; i++) {
             msg_ptr[i] = m->msg[i];
         }
-        running->return_value = m->length;
+        running->syscall_retvalue = m->length;
     }
     List_detach(&mq->msgs, (ListItem*)m);
     assert(m_free(m)>=0);

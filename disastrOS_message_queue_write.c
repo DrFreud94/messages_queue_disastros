@@ -37,14 +37,6 @@ void internal_message_queue_write() {
         running->return_value = DSOS_MESSAGEQUEUEFULL;
         return;
     }
-
-    //TODO: impedire di inviare un messaggio se non ci sono processi che leggono.
-    //Qualora ci sono, inviare lo stesso messaggio a tutti i processi, uno alla volta.
-
-    if(mq->reading_pid == NULL) {
-        running->return_value=DSOS_EREADINGPCBMQNOTFOUND;
-        return;
-    }
     
     Message* m = m_alloc(msg_ptr, length);
     List_insert(&mq->msgs, mq->msgs.last, (ListItem*)m);

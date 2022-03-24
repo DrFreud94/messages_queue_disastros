@@ -8,15 +8,10 @@
 #include "disastrOS_message_queue.h"
 
 //parameter runtime
-int run = 1;
+//int run = 1;
 
 //counters for reading and writing messages
 int counters[2];
-
-void sighandler(int sig) {
-  run = 0;
-  printf("Signal Handler - stop write function");
-}
 
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
@@ -32,14 +27,53 @@ void read_childFunction(void *args) {
   printf("Opening MQ in read mode...\n");
 
   int fd = disastrOS_openResource(*(int*)args, MESSAGE_QUEUE_TYPE, DSOS_READ);
-
+  assert(fd >= 0);
   printf("MQ opened in read mode - fd = %d.\n", fd);
 
-  while(run) {
-    disastrOS_printStatus();
-    printf("writer log (PID: %d)\n", disastrOS_getpid());
-    disastrOS_sleep((20-disastrOS_getpid())*5);
+  char message[MESSAGE_STRING_MAX_LENGTH];
+  memset(message, 0, sizeof(message));
+  int c = 1;
+  int res = -1;
+  while(c) {
+    
+    res = disastrOS_mq_read(fd, message, MESSAGE_STRING_MAX_LENGTH);
+    printf("Result: %d\n", res);
+    switch(res) {
+    
+    case DSOS_WAITINGFORMESSAGE:
+      printf("The queue is EMPTY! But there is a writer in waiting for... Awaiting...\n");
+      disastrOS_printStatus();
+      disastrOS_sleep((20-disastrOS_getpid())*4);
+      break;
+
+    case DSOS_MESSAGEQUEUEEMPTY:
+      printf("The queue is EMPTY! There is no process that want to send a message! Finishing process...\n");
+      disastrOS_printStatus();
+      c = 0;
+      break;
+
+    case DSOS_MESSAGELENGTHNOTVALID:
+      printf("The message length is not valid! Waiting for reading another message!\n");
+      disastrOS_printStatus();
+      disastrOS_sleep((20-disastrOS_getpid())*4);
+      break;
+
+    default:
+      counters[1]++;
+      printf("Message: %s - PID: %d\n", message, disastrOS_getpid());
+      printf("STATUS => written messages: %d, read messages: %d\n", counters[0], counters[1]);
+      disastrOS_printStatus();
+      disastrOS_sleep((20-disastrOS_getpid())*4);
+    }
   }
+
+  // while(run) {
+  //   disastrOS_printStatus();
+  //   printf("writer log (PID: %d)\n", disastrOS_getpid());
+  //   disastrOS_sleep((20-disastrOS_getpid())*5);
+  // }
+  printf("The reader finished his process - closing resource...\n");
+  disastrOS_closeResource(fd, DSOS_READ);
   disastrOS_exit(disastrOS_getpid()+1);
 }
 
@@ -48,17 +82,64 @@ void write_childFunction(void *args) {
   printf("Opening MQ in write mode...\n");
 
   int fd = disastrOS_openResource(*(int*)args, MESSAGE_QUEUE_TYPE, DSOS_WRITE);
+  assert(fd >= 0);
 
   printf("MQ opened in write mode - fd = %d.\n", fd);
 
-  
+  char message[MESSAGE_STRING_MAX_LENGTH];
 
-  while(run) {
-    disastrOS_printStatus();
-    printf("writer log (PID: %d)\n", disastrOS_getpid());
-    printf("***********************************************************************\n");
-    disastrOS_sleep((20-disastrOS_getpid())*5);
+  snprintf(message, MESSAGE_STRING_MAX_LENGTH, "Hi! I'm the writer PID: %d", disastrOS_getpid());
+
+  int res = -1;
+  for(int i = 0; i < 10; i++) {
+    printf("ITERATION NUMBER : %d\n", i);
+    res = disastrOS_mq_write(fd, message, MESSAGE_STRING_MAX_LENGTH);
+    switch(res) {
+
+    case DSOS_MESSAGELENGTHNOTVALID:
+      printf("Message not valid - Too long for communicate\n");
+      printf("STATUS => written messages: %d, read messages: %d\n", counters[0], counters[1]);
+      disastrOS_printStatus();
+      disastrOS_sleep((20-disastrOS_getpid())*3);
+      break;
+
+    case DSOS_RESOURCENOTFOUND:
+      printf("Error! The desired resource is not found! Aborting...\n");
+      i = M_FOR_MQ;
+      break;
+
+    case DSOS_ERESOURCETYPEWRONG:
+      printf("Error! The desired resource with type %d is not found! Aborting...\n", MESSAGE_QUEUE_TYPE);
+      i = M_FOR_MQ;
+      break;
+
+    case DSOS_MESSAGEQUEUEFULL:
+      printf("The queue is FULL! Waiting for write the message...");
+      i--;
+      disastrOS_printStatus();
+      disastrOS_sleep((20-disastrOS_getpid())*3);
+      break;
+
+    default:
+      counters[0]++;
+      printf("STATUS => written messages: %d, read messages: %d\n", counters[0], counters[1]);
+      disastrOS_printStatus();
+      disastrOS_sleep((20-disastrOS_getpid())*3);
+    }
+    // counters[0]++;
+    // printf("STATUS => written messages: %d, read messages: %d\n");
+    // disastrOS_printStatus();
+    // disastrOS_sleep((20-disastrOS_getpid())*6);
   }
+
+  // while(run) {
+  //   disastrOS_printStatus();
+  //   printf("writer log (PID: %d)\n", disastrOS_getpid());
+  //   printf("***********************************************************************\n");
+  //   disastrOS_sleep((20-disastrOS_getpid())*5);
+  // }
+  printf("The writer finished his process - closing resource...\n");
+  disastrOS_closeResource(fd, DSOS_WRITE);
   disastrOS_exit(disastrOS_getpid()+1);
 }
 
@@ -129,6 +210,12 @@ void initFunction(void* args) {
 // 	   pid, retval, alive_children);
 //     --alive_children;
 //   }
+  printf("Written messages: %d\n", counters[0]);
+  printf("readed messages: %d\n", counters[1]);
+
+  for(int i = 0; i < 2; i++) {
+    disastrOS_destroyResource(resources[i]);
+  }
   printf("shutdown!");
   disastrOS_shutdown();
 }
