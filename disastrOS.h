@@ -33,7 +33,7 @@ void disastrOS_sleep(int);
 
 // respurces (files)
 int disastrOS_openResource(int resource_id, int type, int mode);
-int disastrOS_closeResource(int fd) ;
+int disastrOS_closeResource(int fd, int mode) ;
 int disastrOS_destroyResource(int resource_id);
 
 // debug function, prints the state of the internal system

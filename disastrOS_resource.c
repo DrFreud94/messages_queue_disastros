@@ -16,6 +16,8 @@
 
 static Resource* (*alloc_func[MAX_TYPE_RESOURCES])();
 static int (*dealloc_func[MAX_TYPE_RESOURCES])(Resource*);
+static int (*set_mode[MAX_TYPE_RESOURCES])(Resource*, int);
+static int (*delete_mode[MAX_TYPE_RESOURCES])(Resource*, int);
 
 void Resource_init(){
     // int result=PoolAllocator_init(& _resources_allocator,
@@ -32,6 +34,10 @@ void Resource_init(){
     //alloc and dealloc mq
     alloc_func[MESSAGE_QUEUE_TYPE] = mq_alloc;
     dealloc_func[MESSAGE_QUEUE_TYPE] = mq_free;
+
+    //set and delete opening mode for MQ
+    set_mode[MESSAGE_QUEUE_TYPE] = mq_set_mode;
+    delete_mode[MESSAGE_QUEUE_TYPE] = mq_delete_mode;
 }
 
 Resource* Resource_alloc(int id, int type){
@@ -52,6 +58,20 @@ Resource* Resource_alloc(int id, int type){
   return r;
 }
 
+int Resource_open(Resource* resource, int mode) {
+  int result = 0;
+  if(resource->type > STANDARD_RESOURCE_TYPE)
+    result = (*set_mode[resource->type])(resource, mode);
+  return result;
+}
+
+int Resource_release(Resource* r, int mode) {
+  int result = 0;
+  if(r->type > STANDARD_RESOURCE_TYPE)
+    result = (*delete_mode[r->type])(r, mode);
+  return result; 
+}
+
 int Resource_free(Resource* r) {
   if(r->type + 1 > MAX_TYPE_RESOURCES) {
     return DSOS_ERESOURCETYPENOTEXISTING;
@@ -66,8 +86,9 @@ Resource* ResourceList_byId(ResourceList* l, int id) {
   ListItem* aux=l->first;
   while(aux){
     Resource* r=(Resource*)aux;
-    if (r->id==id)
+    if (r->id==id) {
       return r;
+    }
     aux=aux->next;
   }
   return 0;

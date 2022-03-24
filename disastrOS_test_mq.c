@@ -3,10 +3,17 @@
 #include <poll.h>
 #include <assert.h>
 #include <string.h>
+#include <signal.h>
 #include "disastrOS.h"
 #include "disastrOS_message_queue.h"
 
-//array
+//parameter runtime
+int run = 1;
+
+void sighandler(int sig) {
+  run = 0;
+  printf("Signal Handler - stop write function");
+}
 
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
@@ -22,7 +29,11 @@ void read_childFunction() {
 }
 
 void write_childFunction() {
-
+  while(run) {
+    printf("Enter the function write\n");
+    disastrOS_sleep((20-disastrOS_getpid())*5);
+  }
+  disastrOS_exit(disastrOS_getpid()+1);
 }
 
 void childFunction(void* args){
@@ -44,8 +55,13 @@ void childFunction(void* args){
 void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
-//   disastrOS_spawn(sleeperFunction, 0);
+  disastrOS_spawn(sleeperFunction, 0);
+
+  disastrOS_spawn(write_childFunction, 0);
+  int retval = -1;
   
+  disastrOS_wait(0, &retval);
+
 
 //   printf("I feel like to spawn 10 nice threads\n");
 //   int alive_children=0;

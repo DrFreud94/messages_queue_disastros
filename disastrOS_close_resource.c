@@ -10,6 +10,7 @@
 void internal_closeResource(){
   //1 retrieve the fd of the resource to close
   int fd=running->syscall_args[0];
+  int mode = running->syscall_args[1];
 
   Descriptor* des=DescriptorList_byFd(&running->descriptors, fd);
   //2 if the fd is not in the the process, we return an error
@@ -23,6 +24,10 @@ void internal_closeResource(){
   assert(des);
 
   Resource* res=des->resource;
+  if(res->type > STANDARD_RESOURCE_TYPE) {
+    int result = Resource_release(res, mode);
+    assert(result);
+  }
 
   // we remove the descriptor pointer from the resource list
   DescriptorPtr* desptr=(DescriptorPtr*) List_detach(&res->descriptors_ptrs, (ListItem*)(des->ptr));

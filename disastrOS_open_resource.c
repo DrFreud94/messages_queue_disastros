@@ -39,6 +39,11 @@ void internal_openResource(){
      return;
   }
 
+  //set mode on opening resource
+  if(res->type > STANDARD_RESOURCE_TYPE) {
+    int result = Resource_open(res, open_mode);
+    assert(result);
+  }
   
   //5 create the descriptor for the resource in this process, and add it to
   //  the process descriptor list. Assign to the resource a new fd

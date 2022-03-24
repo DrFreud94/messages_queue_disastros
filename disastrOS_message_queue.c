@@ -1,6 +1,7 @@
 #include "disastrOS_message_queue.h"
 #include "pool_allocator.h"
 #include "disastrOS_constants.h"
+#include "disastrOS_globals.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -57,6 +58,25 @@ int mq_free(Resource* r) {
         message = message->next;
     }
     return PoolAllocator_releaseBlock(&_mq_allocator, r);
+}
+
+//set mode
+int mq_set_mode (Resource* r, int mode) {
+    MessageQueue* mq = (MessageQueue*)r;
+    ListItem* l = NULL;
+    if(mode == DSOS_READ) l = List_insert(&mq->reading_pids, mq->reading_pids.last, (ListItem*)running);
+    else if(mode == DSOS_WRITE) l = List_insert(&mq->writing_pids, mq->writing_pids.last, (ListItem*)running);
+    return l != NULL;
+}
+
+//delete mode
+int mq_delete_mode(Resource* r, int mode) {
+    MessageQueue* mq = (MessageQueue*)r;
+    ListItem* l = NULL;
+    if(mode == DSOS_READ) l = List_detach(&mq->reading_pids, (ListItem*)running);
+    else if(mode == DSOS_WRITE) l = List_detach(&mq->writing_pids, (ListItem*)running);
+
+    return l != NULL;
 }
 
 //print queue

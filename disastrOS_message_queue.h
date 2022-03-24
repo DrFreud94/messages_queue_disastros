@@ -35,6 +35,12 @@ Resource* mq_alloc();
 //deallocation of MessageQueue instance
 int mq_free(Resource* r);
 
+//set mode for opening resource
+int mq_set_mode(Resource* r, int mode);
+
+//delete mode on close resource
+int mq_delete_mode(Resource* r, int mode);
+
 //print the queue
 void print_mq(Resource* r);
 

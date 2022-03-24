@@ -13,6 +13,11 @@ typedef struct {
 void Resource_init();
 
 Resource* Resource_alloc(int id, int type);
+
+int Resource_open(Resource* resource, int mode);
+
+int Resource_release(Resource* resource, int mode);
+
 int Resource_free(Resource* resource);
 
 typedef ListHead ResourceList;

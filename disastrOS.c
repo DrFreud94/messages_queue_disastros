@@ -174,7 +174,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   syscall_numarg[DSOS_CALL_OPEN_RESOURCE]     = 3;
 
   syscall_vector[DSOS_CALL_CLOSE_RESOURCE]     = internal_closeResource;
-  syscall_numarg[DSOS_CALL_CLOSE_RESOURCE]     = 1;
+  syscall_numarg[DSOS_CALL_CLOSE_RESOURCE]     = 2;
 
   syscall_vector[DSOS_CALL_DESTROY_RESOURCE]     = internal_destroyResource;
   syscall_numarg[DSOS_CALL_DESTROY_RESOURCE]     = 1;
@@ -289,8 +289,8 @@ int disastrOS_openResource(int resource_id, int type, int mode) {
   return disastrOS_syscall(DSOS_CALL_OPEN_RESOURCE, resource_id, type, mode);
 }
 
-int disastrOS_closeResource(int fd) {
-  return disastrOS_syscall(DSOS_CALL_CLOSE_RESOURCE, fd);
+int disastrOS_closeResource(int fd, int mode) {
+  return disastrOS_syscall(DSOS_CALL_CLOSE_RESOURCE, fd, mode);
 }
 
 int disastrOS_destroyResource(int resource_id) {
