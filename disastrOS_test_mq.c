@@ -37,13 +37,13 @@ void read_childFunction(void *args) {
   while(c) {
     
     res = disastrOS_mq_read(fd, message, MESSAGE_STRING_MAX_LENGTH);
-    printf("Result: %d\n", res);
+    
     switch(res) {
     
     case DSOS_WAITINGFORMESSAGE:
       printf("The queue is EMPTY! But there is a writer in waiting for... Awaiting...\n");
       disastrOS_printStatus();
-      disastrOS_sleep((20-disastrOS_getpid())*4);
+      disastrOS_sleep((20-disastrOS_getpid())*3);
       break;
 
     case DSOS_MESSAGEQUEUEEMPTY:
@@ -55,7 +55,7 @@ void read_childFunction(void *args) {
     case DSOS_MESSAGELENGTHNOTVALID:
       printf("The message length is not valid! Waiting for reading another message!\n");
       disastrOS_printStatus();
-      disastrOS_sleep((20-disastrOS_getpid())*4);
+      disastrOS_sleep((20-disastrOS_getpid())*3);
       break;
 
     default:
@@ -63,7 +63,7 @@ void read_childFunction(void *args) {
       printf("Message: %s - PID: %d\n", message, disastrOS_getpid());
       printf("STATUS => written messages: %d, read messages: %d\n", counters[0], counters[1]);
       disastrOS_printStatus();
-      disastrOS_sleep((20-disastrOS_getpid())*4);
+      disastrOS_sleep((20-disastrOS_getpid())*3);
     }
   }
 
@@ -143,21 +143,21 @@ void write_childFunction(void *args) {
   disastrOS_exit(disastrOS_getpid()+1);
 }
 
-void childFunction(void* args){
-  printf("Hello, I am the child function %d\n",disastrOS_getpid());
-  printf("I will iterate a bit, before terminating\n");
-  int type=0;
-  int mode=0;
-  int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
-  printf("fd=%d\n", fd);
-  printf("PID: %d, terminating\n", disastrOS_getpid());
+// void childFunction(void* args){
+//   printf("Hello, I am the child function %d\n",disastrOS_getpid());
+//   printf("I will iterate a bit, before terminating\n");
+//   int type=0;
+//   int mode=0;
+//   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
+//   printf("fd=%d\n", fd);
+//   printf("PID: %d, terminating\n", disastrOS_getpid());
 
-  for (int i=0; i<(disastrOS_getpid()+1); ++i){
-    printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
-    disastrOS_sleep((20-disastrOS_getpid())*5);
-  }
-  disastrOS_exit(disastrOS_getpid()+1);
-}
+//   for (int i=0; i<(disastrOS_getpid()+1); ++i){
+//     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
+//     disastrOS_sleep((20-disastrOS_getpid())*5);
+//   }
+//   disastrOS_exit(disastrOS_getpid()+1);
+// }
 
 void initFunction(void* args) {
   disastrOS_printStatus();

@@ -43,8 +43,6 @@ void internal_message_queue_read() {
     }
 
     Message* m = (Message*)mq->msgs.first;
-
-    printf("length message: %d\n", m->length);
     
     if(m->length > length) {
         running->syscall_retvalue = DSOS_MESSAGELENGTHNOTVALID;
