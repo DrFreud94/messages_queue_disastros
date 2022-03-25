@@ -64,7 +64,8 @@ void read_childFunction(void *args) {
     }
   }
   printf("The reader finished his process - closing resource...\n");
-  disastrOS_closeResource(fd, DSOS_READ);
+  int r = disastrOS_closeResource(fd, DSOS_READ);
+  assert(r >= 0);
   disastrOS_exit(disastrOS_getpid()+1);
 }
 
@@ -120,7 +121,8 @@ void write_childFunction(void *args) {
   }
 
   printf("The writer finished his process - closing resource...\n");
-  disastrOS_closeResource(fd, DSOS_WRITE);
+  int r = disastrOS_closeResource(fd, DSOS_WRITE);
+  assert(r >= 0);
   disastrOS_exit(disastrOS_getpid()+1);
 }
 

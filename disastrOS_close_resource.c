@@ -26,7 +26,10 @@ void internal_closeResource(){
   Resource* res=des->resource;
   if(res->type > STANDARD_RESOURCE_TYPE) {
     int result = Resource_release(res, mode);
-    assert(result);
+    if (result == 0) {
+      running->syscall_retvalue = DSOS_ERESOURCECLOSE;
+      return;
+    }
   }
 
   // we remove the descriptor pointer from the resource list
