@@ -42,7 +42,10 @@ void internal_openResource(){
   //set mode on opening resource
   if(res->type > STANDARD_RESOURCE_TYPE && open_mode != DSOS_CREATE) {
     int result = Resource_open(res, open_mode);
-    assert(result);
+    if(result == 0) {
+      running->syscall_retvalue = DSOS_ERESOURCEOPEN;
+      return;
+    }
   }
   
   //5 create the descriptor for the resource in this process, and add it to
