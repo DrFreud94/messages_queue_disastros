@@ -64,8 +64,19 @@ int mq_set_mode (Resource* r, int mode) {
         return 0;
     }
     MessageQueue* mq = (MessageQueue*)r;
-    if(mode == DSOS_READ) mq->reading_pid = PCBPtr_alloc(running);
-    else if(mode == DSOS_WRITE) mq->writing_pid = PCBPtr_alloc(running);
+    
+    if(mode == DSOS_READ) {
+        if(mq->reading_pid != NULL) {
+            return 0;
+        }
+        mq->reading_pid = PCBPtr_alloc(running);
+    }
+    else if(mode == DSOS_WRITE) { 
+        if(mq->writing_pid != NULL) {
+            return 0;
+        }
+        mq->writing_pid = PCBPtr_alloc(running);
+    }
     return 1;
 }
 
